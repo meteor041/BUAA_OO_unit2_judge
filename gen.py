@@ -49,6 +49,7 @@ def generate_random_floats_one_decimal(num: int, min_val: float = 0.0, max_val: 
 def main():
     parser = argparse.ArgumentParser(description="Generate elevator simulation requests.")
     parser.add_argument("--num_requests", type=int, default=50, help="Number of requests to generate (1-100).")
+    parser.add_argument("--time_limit", type=int, default=50, help="Limit of input time(1.0-50.0)")
     parser.add_argument("--seed", type=int, default=None, help="Random seed for reproducibility.")
 
     args = parser.parse_args()
@@ -63,7 +64,7 @@ def main():
     floors = ["B4", "B3", "B2", "B1", "F1", "F2", "F3", "F4", "F5", "F6", "F7"]
     elevator_ids = list(range(1, 7))
     passenger_id_counter = 1
-    timestamps = generate_random_floats_one_decimal(args.num_requests, min_val=1.0, max_val=50.0)
+    timestamps = generate_random_floats_one_decimal(args.num_requests, min_val=1.0, max_val=args.time_limit)
     for i in range(args.num_requests):
         passenger_id = f"{passenger_id_counter}"
         priority = random.randint(1, 100)
