@@ -1,19 +1,30 @@
 import re
+import os
 
 def calculate_performance_score(input_file="input.txt", output_file="output.txt"):
     """
     Calculates the performance score based on the given input and output files.
     """
+    # Check if files exist
+    if not os.path.exists(input_file):
+        print(f"Error: Input file '{input_file}' not found.")
+        return
+    if not os.path.exists(output_file):
+        print(f"Error: Output file '{output_file}' not found.")
+        return
 
     # 1. Parse input.txt
     passenger_requests = {}
+    passenger_priorities = {}
     with open(input_file, "r") as f:
         for line in f:
-            match = re.match(r"\[(\d+\.\d+)\](\d+)-PRI-\d+-FROM-\w+-TO-\w+-BY-\d+", line)
+            match = re.match(r"\[(\d+\.\d+)\](\d+)-PRI-(\d+)-FROM-\w+-TO-\w+-BY-\d+", line)
             if match:
                 timestamp = float(match.group(1))
                 passenger_id = int(match.group(2))
+                priority = int(match.group(3))
                 passenger_requests[passenger_id] = timestamp
+                passenger_priorities[passenger_id] = priority
 
     # 2. Parse output.txt
     final_timestamp = 0
@@ -60,13 +71,22 @@ def calculate_performance_score(input_file="input.txt", output_file="output.txt"
     # 4. Calculate WT
     weighted_time_sum = 0
     total_weight = 0
+    missing_passengers = []
+    
     for passenger_id, request_time in passenger_requests.items():
         if passenger_id in passenger_arrival_times:
             arrival_time = passenger_arrival_times[passenger_id]
             completion_time = arrival_time - request_time
-            weighted_time_sum += completion_time * 1  # Assuming weight = 1
-            total_weight += 1
-
+            priority = passenger_priorities[passenger_id]
+            weighted_time_sum += completion_time * priority
+            total_weight += priority
+        else:
+            missing_passengers.append(passenger_id)
+    
+    if missing_passengers:
+        print(f"Warning: {len(missing_passengers)} passengers did not reach their destination:")
+        print(f"Missing passenger IDs: {missing_passengers}")
+    
     wt = weighted_time_sum / total_weight if total_weight > 0 else 0
 
     # 5. Calculate W
